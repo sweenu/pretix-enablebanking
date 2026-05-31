@@ -1,6 +1,36 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from pretix.base.forms import SettingsForm
+from pretix.base.forms import SECRET_REDACTED, SecretKeySettingsField, SettingsForm
+
+
+class SecretTextareaWidget(forms.Textarea):
+    """Textarea variant of pretix' SecretKeySettingsWidget.
+
+    Renders SECRET_REDACTED in place of the stored value so the PEM key
+    is never echoed back to the page once saved. A user-supplied value
+    (i.e. one being submitted now) is reflected back on form re-render
+    so validation errors don't wipe the input.
+    """
+
+    def __init__(self, attrs=None):
+        attrs = dict(attrs or {})
+        attrs.setdefault("autocomplete", "new-password")
+        self.__reflect_value = False
+        super().__init__(attrs)
+
+    def value_from_datadict(self, data, files, name):
+        value = super().value_from_datadict(data, files, name)
+        self.__reflect_value = bool(value) and value != SECRET_REDACTED
+        return value
+
+    def get_context(self, name, value, attrs):
+        if value and not self.__reflect_value:
+            value = SECRET_REDACTED
+        return super().get_context(name, value, attrs)
+
+
+class SecretTextareaField(SecretKeySettingsField):
+    widget = SecretTextareaWidget
 
 
 class EnableBankingSettingsForm(SettingsForm):
@@ -9,10 +39,10 @@ class EnableBankingSettingsForm(SettingsForm):
         required=False,
         help_text=_("Your Enable Banking application ID."),
     )
-    enablebanking_private_key = forms.CharField(
+    enablebanking_private_key = SecretTextareaField(
         label=_("Private Key (PEM)"),
         required=False,
-        widget=forms.Textarea(attrs={"rows": 10, "style": "font-family: monospace;"}),
+        widget=SecretTextareaWidget(attrs={"rows": 10, "style": "font-family: monospace;"}),
         help_text=_("Your RSA private key in PEM format for Enable Banking API authentication."),
     )
     enablebanking_fetch_interval = forms.ChoiceField(
