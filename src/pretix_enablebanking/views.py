@@ -127,11 +127,6 @@ class EnableBankingSettingsView(
             )
         )
 
-        # TODO: remove
-        callback_url = callback_url.replace("http://", "https://").replace(
-            "localhost:8000", "localhost:8443"
-        )
-
         # Read maximum_consent_validity from form (populated by JS from ASPSP dropdown data)
         mcv_str = request.POST.get("maximum_consent_validity", "")
         maximum_consent_validity = int(mcv_str) if mcv_str.isdigit() else None
