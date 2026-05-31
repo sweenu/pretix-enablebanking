@@ -1,0 +1,4 @@
+recursive-include src/pretix_enablebanking/static *
+recursive-include src/pretix_enablebanking/templates *
+recursive-include src/pretix_enablebanking/locale *
+include LICENSE

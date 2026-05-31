@@ -1,10 +1,11 @@
 from django.utils.translation import gettext_lazy
+
 from . import __version__
 
 try:
-    from pretix.base.plugins import PluginConfig, PLUGIN_LEVEL_ORGANIZER
+    from pretix.base.plugins import PLUGIN_LEVEL_ORGANIZER, PluginConfig
 except ImportError:
-    raise RuntimeError("Please use pretix 2.7 or above to run this plugin!")
+    raise RuntimeError("Please use pretix 2.7 or above to run this plugin!") from None
 
 
 class PluginApp(PluginConfig):
@@ -28,8 +29,12 @@ class PluginApp(PluginConfig):
     def uninstalled(self, organizer):
         from .models import EnableBankingConnection
 
-        for key in ('enablebanking_app_id', 'enablebanking_private_key',
-                    'enablebanking_fetch_interval', 'enablebanking_country'):
+        for key in (
+            "enablebanking_app_id",
+            "enablebanking_private_key",
+            "enablebanking_fetch_interval",
+            "enablebanking_country",
+        ):
             organizer.settings.delete(key)
 
         EnableBankingConnection.objects.filter(organizer=organizer).delete()

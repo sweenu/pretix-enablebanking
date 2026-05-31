@@ -96,10 +96,10 @@ The import view shows a **Sandbox mode** warning when a mock bank is connected.
 | Package | Purpose |
 |---|---|
 | `pretix >= 2.7.0` | Host platform |
-| `requests` | HTTP calls to Enable Banking API |
+| `requests >= 2.32.0` | HTTP calls to Enable Banking API |
 | `PyJWT` | RS256-signed JWT for API authentication (transitive via pretix) |
 
-Python 3.10+ required.
+Python 3.11+ required.
 
 ## Permissions
 
