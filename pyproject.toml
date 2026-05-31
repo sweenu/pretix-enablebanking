@@ -110,7 +110,7 @@ ignore = [
 # Keep the en dash in displayed account names
 "src/pretix_enablebanking/views.py" = ["RUF001"]
 # Test files: imports after env setup, star imports from pretix settings, unused vars in fixtures
-"tests/*.py" = ["ARG001", "ARG005", "E402", "F403", "F405", "F841", "RUF059"]
+"tests/*.py" = ["ARG001", "ARG002", "ARG005", "E402", "F403", "F405", "F841", "RUF001", "RUF059"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
@@ -124,7 +124,7 @@ pythonpath = ["src", "."]
 [tool.coverage.run]
 source = ["pretix_enablebanking"]
 branch = true
-omit = ["*/tests/*", "*/__pycache__/*"]
+omit = ["*/tests/*", "*/__pycache__/*", "*/migrations/*"]
 
 [tool.coverage.report]
 exclude_lines = [
