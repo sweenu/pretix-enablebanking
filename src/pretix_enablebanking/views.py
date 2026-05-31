@@ -224,7 +224,7 @@ class EnableBankingImportView(
 
     def _handle_fetch_now(self, request):
         try:
-            EnableBankingConnection.objects.get(
+            connection = EnableBankingConnection.objects.get(
                 organizer=request.organizer,
                 state=EnableBankingConnection.STATE_ACTIVE,
             )
@@ -234,9 +234,17 @@ class EnableBankingImportView(
             return redirect(self._import_url())
 
         date_from = request.POST.get("date_from", "")
+        account_id_raw = request.POST.get("account_id", "")
         kwargs = {"organizer_id": request.organizer.pk}
         if date_from:
             kwargs["date_from"] = date_from
+        if account_id_raw.isdigit():
+            if not EnableBankingAccount.objects.filter(
+                pk=int(account_id_raw), connection=connection, is_active=True
+            ).exists():
+                messages.error(request, _("Unknown or inactive account."))
+                return redirect(self._import_url())
+            kwargs["account_id"] = int(account_id_raw)
 
         fetch_enablebanking_transactions.apply_async(kwargs=kwargs)
         messages.success(request, _("Transaction fetch started. Results will appear shortly."))

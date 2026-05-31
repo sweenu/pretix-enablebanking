@@ -31,6 +31,19 @@
                                 <input type="date" name="date_from" id="date_from" class="form-control"
                                        value="{{ date_from_default }}">
                             </div>
+                            {% if accounts %}
+                                <div class="form-group">
+                                    <label for="account_id">{% trans "Account" %}</label>
+                                    <select name="account_id" id="account_id" class="form-control">
+                                        <option value="">{% trans "All active accounts" %}</option>
+                                        {% for account in accounts %}
+                                            {% if account.is_active %}
+                                                <option value="{{ account.pk }}">{{ account.account_name }}{% if account.iban %} ({{ account.iban }}){% endif %}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            {% endif %}
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fa fa-download"></i> {% trans "Fetch now" %}
