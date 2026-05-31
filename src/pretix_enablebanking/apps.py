@@ -5,7 +5,7 @@ from . import __version__
 try:
     from pretix.base.plugins import PLUGIN_LEVEL_ORGANIZER, PluginConfig
 except ImportError:
-    raise RuntimeError("Please use pretix 2.7 or above to run this plugin!") from None
+    raise RuntimeError("Please use pretix 2026.3 or above to run this plugin!") from None
 
 
 class PluginApp(PluginConfig):
@@ -24,7 +24,7 @@ class PluginApp(PluginConfig):
         visible = True
         version = __version__
         category = "PAYMENT"
-        compatibility = "pretix>=2.7.0"
+        compatibility = "pretix>=2026.3.0"
         level = PLUGIN_LEVEL_ORGANIZER
 
     def uninstalled(self, organizer):
