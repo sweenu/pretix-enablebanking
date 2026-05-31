@@ -39,7 +39,6 @@
             ];
 
             dependencies = [
-              pyPkgs.pretix
               pyPkgs.requests
             ];
 

@@ -2035,7 +2035,6 @@ name = "pretix-enablebanking"
 version = "1.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "pretix" },
     { name = "requests" },
 ]
 
@@ -2053,7 +2052,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.9.1" },
-    { name = "pretix", specifier = ">=2026.3.0" },
     { name = "pretix", marker = "extra == 'dev'", specifier = ">=2026.3.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
