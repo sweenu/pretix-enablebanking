@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class EnableBankingClient:
     BASE_URL = "https://api.enablebanking.com"
+    MAX_TRANSACTION_PAGES = 200
 
     def __init__(self, app_id, private_key_pem):
         self.app_id = app_id
@@ -101,7 +102,7 @@ class EnableBankingClient:
             params["date_from"] = str(date_from)
 
         transactions = []
-        while True:
+        for _page in range(self.MAX_TRANSACTION_PAGES):
             resp = requests.get(
                 f"{self.BASE_URL}/accounts/{account_uid}/transactions",
                 params=params,
@@ -117,6 +118,14 @@ class EnableBankingClient:
                 break
 
             params["continuation_key"] = continuation_key
+        else:
+            logger.warning(
+                "Enable Banking pagination hit %d-page cap for account %s; "
+                "stopping with %d transactions collected",
+                self.MAX_TRANSACTION_PAGES,
+                account_uid,
+                len(transactions),
+            )
 
         return {"booked": transactions, "pending": []}
 
