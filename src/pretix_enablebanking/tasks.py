@@ -1,6 +1,7 @@
 import logging
 from datetime import date, timedelta
 
+import requests
 from django.utils.timezone import now
 from pretix.base.models import Organizer
 from pretix.celery_app import app
@@ -61,6 +62,13 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
 
             try:
                 result = client.get_transactions(account.account_uid, date_from=fetch_from)
+            except requests.RequestException as exc:
+                # Transient network/HTTP errors — let Celery retry the task.
+                logger.warning(
+                    "Transient error fetching transactions for account %s; will retry",
+                    account.account_uid,
+                )
+                raise self.retry(exc=exc) from exc
             except Exception:
                 logger.exception("Failed to fetch transactions for account %s", account.account_uid)
                 continue
