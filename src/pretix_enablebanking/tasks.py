@@ -52,7 +52,10 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
             if date_from:
                 fetch_from = date.fromisoformat(date_from)
             elif account.last_fetch_date:
-                fetch_from = account.last_fetch_date
+                # Overlap one day so a failed process_banktransfers run can
+                # be recovered on the next fetch (pretix dedupes by
+                # external_id+date+amount, so the overlap is harmless).
+                fetch_from = account.last_fetch_date - timedelta(days=1)
             else:
                 fetch_from = date.today() - timedelta(days=30)
 
