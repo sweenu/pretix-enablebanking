@@ -103,7 +103,7 @@ Python 3.11+ required.
 
 ## Permissions
 
-The plugin operates at organizer level. Users need **can_change_organizer_settings** to access settings and trigger imports.
+The plugin operates at organizer level. Users need the **`organizer.settings.general:write`** permission ("Settings → View and change" on the team page) to access settings and trigger imports.
 
 ## License
 

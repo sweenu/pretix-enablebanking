@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class EnableBankingSettingsView(
     OrganizerDetailViewMixin, OrganizerPermissionRequiredMixin, FormView
 ):
-    permission = "can_change_organizer_settings"
+    permission = "organizer.settings.general:write"
     template_name = "pretix_enablebanking/settings.html"
     form_class = EnableBankingSettingsForm
 
@@ -174,7 +174,7 @@ class EnableBankingSettingsView(
 class EnableBankingImportView(
     OrganizerDetailViewMixin, OrganizerPermissionRequiredMixin, TemplateView
 ):
-    permission = "can_change_organizer_settings"
+    permission = "organizer.settings.general:write"
     template_name = "pretix_enablebanking/import.html"
 
     def get_context_data(self, **kwargs):
@@ -273,7 +273,7 @@ class EnableBankingImportView(
 
 
 class EnableBankingCallbackView(OrganizerDetailViewMixin, OrganizerPermissionRequiredMixin, View):
-    permission = "can_change_organizer_settings"
+    permission = "organizer.settings.general:write"
 
     def get(self, request, *args, **kwargs):
         import_url = reverse(

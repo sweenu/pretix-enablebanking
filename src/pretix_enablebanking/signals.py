@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def control_nav_orga(sender, request=None, **kwargs):
     url = resolve(request.path_info)
     if not request.user.has_organizer_permission(
-        request.organizer, "can_change_organizer_settings", request=request
+        request.organizer, "organizer.settings.general:write", request=request
     ):
         return []
 
