@@ -15,7 +15,7 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
     from pretix.plugins.banktransfer.tasks import process_banktransfers
 
     from .enablebanking_client import get_enablebanking_client
-    from .models import EnableBankingAccount, EnableBankingConnection
+    from .models import EnableBankingAccount, EnableBankingConnection, EnableBankingImportJob
 
     with scopes_disabled():
         try:
@@ -112,6 +112,11 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
             job = BankImportJob.objects.create(
                 organizer=organizer,
                 currency=account.currency,
+            )
+            EnableBankingImportJob.objects.create(
+                bank_import_job=job,
+                account=account,
+                organizer=organizer,
             )
             logger.info(
                 "Created BankImportJob pk=%s for account %s (%d transactions)",

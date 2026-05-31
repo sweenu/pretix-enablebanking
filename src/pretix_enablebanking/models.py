@@ -57,3 +57,33 @@ class EnableBankingAccount(models.Model):
 
     def __str__(self):
         return f"{self.account_name} ({self.iban})"
+
+
+class EnableBankingImportJob(models.Model):
+    """Links a pretix BankImportJob to the EnableBankingAccount that produced it.
+
+    Used so "clear history" only deletes jobs created by this plugin, not
+    CSV uploads or other banktransfer sources.
+    """
+
+    bank_import_job = models.OneToOneField(
+        "banktransfer.BankImportJob",
+        on_delete=models.CASCADE,
+        related_name="enablebanking_source",
+    )
+    account = models.ForeignKey(
+        EnableBankingAccount,
+        on_delete=models.SET_NULL,
+        related_name="import_jobs",
+        null=True,
+        blank=True,
+    )
+    organizer = models.ForeignKey(
+        "pretixbase.Organizer",
+        on_delete=models.CASCADE,
+        related_name="enablebanking_import_jobs",
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "pretix_enablebanking"

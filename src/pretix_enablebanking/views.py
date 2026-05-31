@@ -16,7 +16,7 @@ from pretix.plugins.banktransfer.models import BankImportJob
 
 from .enablebanking_client import get_enablebanking_client
 from .forms import EnableBankingSettingsForm
-from .models import EnableBankingAccount, EnableBankingConnection
+from .models import EnableBankingAccount, EnableBankingConnection, EnableBankingImportJob
 from .tasks import fetch_enablebanking_transactions
 
 logger = logging.getLogger(__name__)
@@ -181,7 +181,8 @@ class EnableBankingImportView(
         ctx["accounts"] = accounts
 
         ctx["recent_jobs"] = BankImportJob.objects.filter(
-            organizer=self.request.organizer
+            organizer=self.request.organizer,
+            enablebanking_source__isnull=False,
         ).order_by("-created")[:10]
 
         dates = [a.last_fetch_date for a in accounts if a.last_fetch_date]
@@ -234,7 +235,10 @@ class EnableBankingImportView(
         return redirect(self._import_url())
 
     def _handle_clear_history(self, request):
-        deleted, _counts = BankImportJob.objects.filter(organizer=request.organizer).delete()
+        plugin_job_ids = EnableBankingImportJob.objects.filter(
+            organizer=request.organizer
+        ).values_list("bank_import_job_id", flat=True)
+        deleted, _counts = BankImportJob.objects.filter(pk__in=list(plugin_job_ids)).delete()
         messages.success(request, _("Import history cleared ({n} jobs removed).").format(n=deleted))
         return redirect(self._import_url())
 

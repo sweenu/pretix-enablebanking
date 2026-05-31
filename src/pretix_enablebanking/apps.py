@@ -12,6 +12,7 @@ class PluginApp(PluginConfig):
     default = True
     name = "pretix_enablebanking"
     verbose_name = "Enable Banking"
+    default_auto_field = "django.db.models.BigAutoField"
 
     class PretixPluginMeta:
         name = gettext_lazy("Enable Banking")
