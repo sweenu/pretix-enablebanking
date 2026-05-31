@@ -102,6 +102,12 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
 
             transactions = []
             for tx in booked:
+                # Only process incoming credits — pretix matches order codes
+                # against payer references on money coming IN. Outgoing debits
+                # would reverse debtor/creditor and produce nonsense matches.
+                if tx.get("credit_debit_indicator") != "CRDT":
+                    continue
+
                 tx_amount = tx.get("transaction_amount", {})
                 amount = tx_amount.get("amount", "0")
 
@@ -111,17 +117,9 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
                     " ".join(remittance) if isinstance(remittance, list) else str(remittance)
                 )
 
-                # debtor/creditor names are nested objects
-                payer = (tx.get("debtor") or {}).get("name", "") or (tx.get("creditor") or {}).get(
-                    "name", ""
-                )
-
-                iban = (tx.get("debtor_account") or {}).get("iban", "") or (
-                    tx.get("creditor_account") or {}
-                ).get("iban", "")
-                bic = (tx.get("debtor_account") or {}).get("bic", "") or (
-                    tx.get("creditor_account") or {}
-                ).get("bic", "")
+                payer = (tx.get("debtor") or {}).get("name", "")
+                iban = (tx.get("debtor_account") or {}).get("iban", "")
+                bic = (tx.get("debtor_account") or {}).get("bic", "")
 
                 ref_number = tx.get("reference_number", "")
                 if ref_number and ref_number not in reference:
