@@ -5,7 +5,7 @@ from . import __version__
 try:
     from pretix.base.plugins import PLUGIN_LEVEL_ORGANIZER, PluginConfig
 except ImportError:
-    raise RuntimeError("Please use pretix 2026.3 or above to run this plugin!") from None
+    raise ImportError("Please use pretix 2026.3 or above to run this plugin!") from None
 
 
 class PluginApp(PluginConfig):
