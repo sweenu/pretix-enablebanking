@@ -314,7 +314,11 @@ class EnableBankingCallbackView(OrganizerDetailViewMixin, OrganizerPermissionReq
             messages.error(request, _("Failed to create bank session. Please try again."))
             return redirect(import_url)
 
-        logger.debug("Enable Banking session response: %s", session)
+        logger.info(
+            "Enable Banking session established for organizer %s (%d accounts)",
+            request.organizer.slug,
+            len(session.get("accounts", [])),
+        )
 
         connection.session_id = session.get("session_id", "")
         connection.state = EnableBankingConnection.STATE_ACTIVE
@@ -331,7 +335,6 @@ class EnableBankingCallbackView(OrganizerDetailViewMixin, OrganizerPermissionReq
         )
 
         for acct in session.get("accounts", []):
-            logger.debug("Enable Banking account data: %s", acct)
             uid = acct.get("uid", "")
             iban = acct.get("account_id", {}).get("iban") or ""
             if not uid or not iban:

@@ -46,7 +46,7 @@ class EnableBankingClient:
         )
 
         if not resp.ok:
-            logger.error("Enable Banking GET /aspsps failed %s: %s", resp.status_code, resp.text)
+            logger.error("Enable Banking GET /aspsps failed: HTTP %s", resp.status_code)
 
         resp.raise_for_status()
         return resp.json().get("aspsps", [])
@@ -80,7 +80,7 @@ class EnableBankingClient:
         )
 
         if not resp.ok:
-            logger.error("Enable Banking POST /auth failed %s: %s", resp.status_code, resp.text)
+            logger.error("Enable Banking POST /auth failed: HTTP %s", resp.status_code)
 
         resp.raise_for_status()
         return resp.json()
