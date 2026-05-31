@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -54,7 +56,12 @@ class EnableBankingAccount(models.Model):
 
     class Meta:
         app_label = "pretix_enablebanking"
-        unique_together = ("connection", "account_uid")
+        constraints: ClassVar = [
+            models.UniqueConstraint(
+                fields=["connection", "account_uid"],
+                name="enablebanking_account_unique_uid_per_connection",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.account_name} ({self.iban})"
