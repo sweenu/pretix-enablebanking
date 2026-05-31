@@ -29,7 +29,7 @@
         {
           default = pyPkgs.buildPythonPackage {
             pname = "pretix-enablebanking";
-            version = "1.0.4";
+            version = "1.1.0";
             src = self;
             format = "pyproject";
 
