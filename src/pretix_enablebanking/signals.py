@@ -79,7 +79,15 @@ def periodic_fetch(sender, **kwargs):
         if not interval or interval == "0":
             continue
 
-        interval_minutes = int(interval)
+        try:
+            interval_minutes = int(interval)
+        except (TypeError, ValueError):
+            logger.warning(
+                "Invalid enablebanking_fetch_interval %r for organizer %s; skipping",
+                interval,
+                connection.organizer.slug,
+            )
+            continue
 
         for account in connection.accounts.filter(is_active=True):
             if account.last_fetched:
