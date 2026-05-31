@@ -62,8 +62,28 @@ def fetch_enablebanking_transactions(self, organizer_id, account_id=None, date_f
 
             try:
                 result = client.get_transactions(account.account_uid, date_from=fetch_from)
+            except requests.HTTPError as exc:
+                status = exc.response.status_code if exc.response is not None else None
+                if status in (401, 403):
+                    # Consent was revoked or the session is no longer accepted.
+                    EnableBankingConnection.objects.filter(pk=connection.pk).update(
+                        state=EnableBankingConnection.STATE_ERROR,
+                    )
+                    logger.error(
+                        "Enable Banking refused account %s (HTTP %s); marking connection as error",
+                        account.account_uid,
+                        status,
+                    )
+                    return
+                # Other HTTP errors are treated as transient.
+                logger.warning(
+                    "HTTP %s fetching transactions for account %s; will retry",
+                    status,
+                    account.account_uid,
+                )
+                raise self.retry(exc=exc) from exc
             except requests.RequestException as exc:
-                # Transient network/HTTP errors — let Celery retry the task.
+                # Transient network errors — let Celery retry the task.
                 logger.warning(
                     "Transient error fetching transactions for account %s; will retry",
                     account.account_uid,

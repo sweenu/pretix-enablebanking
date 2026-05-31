@@ -83,6 +83,40 @@
                 </div>
                 {% endwith %}
 
+            {% elif connection and connection.state == 'expired' %}
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {% trans "Bank link expired" %}
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        {% url 'plugins:pretix_enablebanking:settings' organizer=request.organizer.slug as settings_url %}
+                        {% blocktrans trimmed with url=settings_url %}
+                            The consent for this bank link has expired. Please
+                            <a href="{{ url }}">reconnect your bank</a> to resume imports.
+                        {% endblocktrans %}
+                    </div>
+                </div>
+
+            {% elif connection and connection.state == 'error' %}
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {% trans "Bank connection rejected" %}
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        {% url 'plugins:pretix_enablebanking:settings' organizer=request.organizer.slug as settings_url %}
+                        {% blocktrans trimmed with url=settings_url %}
+                            The bank rejected the current session (consent may have been revoked).
+                            Please <a href="{{ url }}">reconnect your bank</a> to resume imports.
+                        {% endblocktrans %}
+                    </div>
+                </div>
+
             {% elif connection and connection.state == 'awaiting_auth' %}
                 <div class="panel panel-info">
                     <div class="panel-heading">

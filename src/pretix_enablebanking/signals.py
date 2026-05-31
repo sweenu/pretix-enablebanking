@@ -75,6 +75,19 @@ def periodic_fetch(sender, **kwargs):
 
     current_time = now()
     for connection in connections:
+        if (
+            connection.connection_expires_at is not None
+            and connection.connection_expires_at <= current_time
+        ):
+            EnableBankingConnection.objects.filter(pk=connection.pk).update(
+                state=EnableBankingConnection.STATE_EXPIRED,
+            )
+            logger.info(
+                "Enable Banking connection for organizer %s marked expired",
+                connection.organizer.slug,
+            )
+            continue
+
         interval = connection.organizer.settings.get("enablebanking_fetch_interval", default="0")
         if not interval or interval == "0":
             continue
