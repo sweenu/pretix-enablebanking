@@ -1,5 +1,4 @@
 import logging
-import uuid
 from datetime import UTC, datetime, timedelta
 
 import jwt as pyjwt
@@ -52,7 +51,14 @@ class EnableBankingClient:
         resp.raise_for_status()
         return resp.json().get("aspsps", [])
 
-    def create_auth(self, aspsp_name, aspsp_country, redirect_url, maximum_consent_validity=None):
+    def create_auth(
+        self,
+        aspsp_name,
+        aspsp_country,
+        redirect_url,
+        state,
+        maximum_consent_validity=None,
+    ):
         # Use the ASPSP's maximum_consent_validity (seconds) if provided, else fall back to 90 days
         seconds = maximum_consent_validity if maximum_consent_validity else 90 * 24 * 3600
         valid_until = (datetime.now(tz=UTC) + timedelta(seconds=seconds)).strftime(
@@ -62,7 +68,7 @@ class EnableBankingClient:
         body = {
             "access": {"valid_until": valid_until},
             "aspsp": {"name": aspsp_name, "country": aspsp_country},
-            "state": str(uuid.uuid4()),
+            "state": state,
             "redirect_url": redirect_url,
             "psu_type": "personal",
         }

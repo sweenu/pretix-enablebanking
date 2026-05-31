@@ -26,6 +26,7 @@ class EnableBankingConnection(models.Model):
     aspsp_country = models.CharField(max_length=10, blank=True, default="")
     state = models.CharField(max_length=32, choices=STATES, default=STATE_UNCONFIGURED)
     auth_link = models.URLField(max_length=500, blank=True, default="")
+    auth_state = models.CharField(max_length=64, blank=True, default="")
     connection_expires_at = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

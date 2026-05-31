@@ -1,4 +1,5 @@
 import logging
+import secrets
 from datetime import timedelta
 
 import requests
@@ -131,17 +132,23 @@ class EnableBankingSettingsView(
         mcv_str = request.POST.get("maximum_consent_validity", "")
         maximum_consent_validity = int(mcv_str) if mcv_str.isdigit() else None
 
+        auth_state = secrets.token_urlsafe(32)
+
         try:
             auth_data = client.create_auth(
                 aspsp_name,
                 aspsp_country,
                 redirect_url=callback_url,
+                state=auth_state,
                 maximum_consent_validity=maximum_consent_validity,
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Enable Banking create_auth failed")
-            messages.error(request, _("Enable Banking error: {error}").format(error=str(e)))
+            messages.error(
+                request,
+                _("Could not initiate bank authorization. Check the logs for details."),
+            )
             return redirect(self.get_success_url())
 
         auth_url = auth_data.get("url", "")
@@ -153,6 +160,7 @@ class EnableBankingSettingsView(
                 "aspsp_country": aspsp_country,
                 "state": EnableBankingConnection.STATE_AWAITING_AUTH,
                 "auth_link": auth_url,
+                "auth_state": auth_state,
             },
         )
         return redirect(auth_url)
@@ -276,6 +284,18 @@ class EnableBankingCallbackView(OrganizerDetailViewMixin, OrganizerPermissionReq
             messages.error(request, _("No pending bank authorization found."))
             return redirect(import_url)
 
+        # Verify the OAuth state parameter to prevent CSRF on the consent flow.
+        returned_state = request.GET.get("state", "")
+        if not connection.auth_state or not secrets.compare_digest(
+            connection.auth_state, returned_state
+        ):
+            logger.warning(
+                "Enable Banking callback state mismatch for organizer %s",
+                request.organizer.slug,
+            )
+            messages.error(request, _("Authorization could not be verified. Please try again."))
+            return redirect(import_url)
+
         code = request.GET.get("code", "")
         if not code:
             messages.error(request, _("No authorization code received from bank."))
@@ -298,6 +318,7 @@ class EnableBankingCallbackView(OrganizerDetailViewMixin, OrganizerPermissionReq
 
         connection.session_id = session.get("session_id", "")
         connection.state = EnableBankingConnection.STATE_ACTIVE
+        connection.auth_state = ""
 
         valid_until_str = session.get("access", {}).get("valid_until")
         connection.connection_expires_at = (
@@ -305,7 +326,9 @@ class EnableBankingCallbackView(OrganizerDetailViewMixin, OrganizerPermissionReq
             if valid_until_str
             else now() + timedelta(days=90)
         )
-        connection.save(update_fields=["session_id", "state", "connection_expires_at"])
+        connection.save(
+            update_fields=["session_id", "state", "auth_state", "connection_expires_at"]
+        )
 
         for acct in session.get("accounts", []):
             logger.debug("Enable Banking account data: %s", acct)
